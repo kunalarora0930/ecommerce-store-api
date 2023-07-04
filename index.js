@@ -15,7 +15,7 @@ import paymentRoutes from './routes/paymentRoutes.js';
 import shippingRoutes from './routes/shippingRoutes.js';
 import searchRoutes from './routes/searchRoutes.js';
 import analyticsRoutes from './routes/analyticsRoutes.js';
-//--------------api routes^-------------------------------------------------------------------
+
 
 
 dotenv.config();
