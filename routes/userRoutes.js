@@ -3,6 +3,7 @@ import User from '../models/User.js';
 import jwt from 'jsonwebtoken';
 import authenticate from '../middleWare/authMiddleWare.js';
 import adminAuth from '../middleware/adminAuthMiddleware.js';
+import bcrypt from 'bcryptjs/dist/bcrypt.js';
 
 const router = express.Router();
 
@@ -12,10 +13,10 @@ const router = express.Router();
 // User signup
 router.post('/signup', async (req, res) => {
     const { name, email, password } = req.body;
-    
+    console.log(req.body);
     try {
         // Check if a user with the same email already exists
-        const existingUser = await User.findOne({ email });
+        const existingUser = await User.findOne({ name, email, password }); // Increase timeout to 15 seconds
         if (existingUser) {
             return res.status(409).json({ error: 'Email already exists' });
         }
@@ -24,17 +25,23 @@ router.post('/signup', async (req, res) => {
         const hashedPassword = await bcrypt.hash(password, 10);
         
         // Create a new user
-        const newUser = new User({ name, email, password: hashedPassword });
-        const savedUser = await newUser.save();
+        // const newUser = new User({ name, email, password: hashedPassword });
+        // const savedUser = await newUser.save();
+
+        const newUser = await User.create({
+            name,
+            email,
+            password: hashedPassword
+        })
         
         // Generate JWT
-        const token = jwt.sign({ userId: savedUser._id }, process.env.JWT_SECRET, {
+        const token = jwt.sign({ userId: newUser._id }, process.env.JWT_SECRET, {
             expiresIn: '1h',
         });
 
-        // Send the token in the response
-        res.json({ token });
+        res.json({ newUser, token });
     } catch (error) {
+        console.log(error);
         res.status(500).json({ error: 'Failed to register user' });
     }
 });
@@ -62,6 +69,7 @@ router.post('/login', async (req, res) => {
         // Send the token in the response
         res.json({ user, token });
     } catch (error) {
+        console.log(error);
         res.status(500).json({ error: 'Failed to authenticate' });
     }
 });
@@ -88,6 +96,7 @@ router.get('/:id', authenticate, async (req, res) => {
         }
         res.json(user);
     } catch (error) {
+        console.log(error);
     res.status(500).json({ error: 'Failed to fetch user' });
   }
 });
@@ -118,6 +127,7 @@ router.delete('/:id', authenticate, async (req, res) => {
     }
     res.json({ message: 'User deleted successfully' });
   } catch (error) {
+    console.log(error);
     res.status(500).json({ error: 'Failed to delete user' });
   }
 });

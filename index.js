@@ -1,10 +1,7 @@
 import express from 'express';
 import cors from 'cors';
-import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import connectDB from "./mongoDB/connect.js";
-
-
 //import api routes-----------------------------------------------------------------------
 import userRoutes from './routes/userRoutes.js';
 import productRoutes from './routes/productRoutes.js';
