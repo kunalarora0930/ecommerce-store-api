@@ -1,11 +1,12 @@
 import express from 'express';
 import Product from '../models/Product.js';
+import adminAuth from '../middleware/adminAuthMiddleware.js';
 
 const router = express.Router();
 
 // Route: GET /products
 // Get all products
-router.get('/products', async (req, res) => {
+router.get('/products', adminAuth, async (req, res) => {
   try {
     const products = await Product.find();
     res.json(products);
@@ -16,7 +17,7 @@ router.get('/products', async (req, res) => {
 
 // Route: GET /products/:productId
 // Get a specific product by ID
-router.get('/products/:productId', async (req, res) => {
+router.get('/products/:productId', adminAuth, async (req, res) => {
   try {
     const product = await Product.findById(req.params.productId);
     if (!product) {
@@ -30,7 +31,7 @@ router.get('/products/:productId', async (req, res) => {
 
 // Route: POST /products
 // Create a new product
-router.post('/products', async (req, res) => {
+router.post('/products', adminAuth, async (req, res) => {
   const { title, description, price } = req.body;
 
   try {
@@ -44,7 +45,7 @@ router.post('/products', async (req, res) => {
 
 // Route: PUT /products/:productId
 // Update a product by ID
-router.put('/products/:productId', async (req, res) => {
+router.put('/products/:productId', adminAuth, async (req, res) => {
   const { title, description, price } = req.body;
 
   try {
@@ -64,7 +65,7 @@ router.put('/products/:productId', async (req, res) => {
 
 // Route: DELETE /products/:productId
 // Delete a product by ID
-router.delete('/products/:productId', async (req, res) => {
+router.delete('/products/:productId', adminAuth, async (req, res) => {
   try {
     const deletedProduct = await Product.findByIdAndDelete(req.params.productId);
     if (!deletedProduct) {
