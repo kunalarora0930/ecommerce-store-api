@@ -1,11 +1,12 @@
 import express from 'express';
 import Cart from '../models/Cart.js';
+import authenticate from '../middleWare/authMiddleWare.js';
 
 const router = express.Router();
 
 // Route: POST /carts
 // Create a new cart
-router.post('/', async (req, res) => {
+router.post('/', authenticate, async (req, res) => {
   try {
     const newCart = new Cart(req.body);
     const savedCart = await newCart.save();
@@ -17,7 +18,7 @@ router.post('/', async (req, res) => {
 
 // Route: GET /carts/:id
 // Get cart items by cart ID
-router.get('/:id', async (req, res) => {
+router.get('/:id', authenticate, async (req, res) => {
   try {
     const cart = await Cart.findById(req.params.id).populate('items.product', 'name price');
     if (!cart) {
@@ -31,7 +32,7 @@ router.get('/:id', async (req, res) => {
 
 // Route: POST /carts/:id/items
 // Add an item to the cart
-router.post('/:id/items', async (req, res) => {
+router.post('/:id/items', authenticate, async (req, res) => {
   try {
     const { productId, quantity } = req.body;
     const cart = await Cart.findById(req.params.id);
@@ -59,7 +60,7 @@ router.post('/:id/items', async (req, res) => {
 
 // Route: PUT /carts/:id/items/:itemId
 // Update the quantity of an item in the cart
-router.put('/:id/items/:itemId', async (req, res) => {
+router.put('/:id/items/:itemId', authenticate, async (req, res) => {
   try {
     const { quantity } = req.body;
     const cart = await Cart.findById(req.params.id);
@@ -84,7 +85,7 @@ router.put('/:id/items/:itemId', async (req, res) => {
 
 // Route: DELETE /carts/:id/items/:itemId
 // Remove an item from the cart
-router.delete('/:id/items/:itemId', async (req, res) => {
+router.delete('/:id/items/:itemId', authenticate, async (req, res) => {
   try {
     const cart = await Cart.findById(req.params.id);
 

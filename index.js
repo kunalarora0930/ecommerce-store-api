@@ -2,6 +2,8 @@ import express from 'express';
 import cors from 'cors';
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
+import connectDB from "./mongoDB/connect.js";
+
 
 //import api routes-----------------------------------------------------------------------
 import userRoutes from './routes/userRoutes.js';
@@ -43,23 +45,25 @@ app.use('/api/analytics', analyticsRoutes);
 
 
 
-// MongoDB connection
-const dbURL = process.env.MONGODB_URL;
-mongoose.connect(dbURL, { useNewUrlParser: true, useUnifiedTopology: true })
-  .then(() => {
-    console.log('Connected to MongoDB');
-  })
-  .catch((error) => {
-    console.error('MongoDB connection error:', error);
-  });
+
 
 // Define your routes
 app.get('/', (req, res) => {
-  res.send('Welcome to your eCommerce store backend!');
+    res.send('Welcome to e-Commerce store backend!');
 });
 
 // Start the server
-const port = process.env.PORT || 3000;
-app.listen(port, () => {
-  console.log(`Server is running on port ${port}`);
-});
+
+const startServer = async () => {
+    try {
+        connectDB(process.env.MONGODB_URL);
+        const port = process.env.PORT || 3000;
+        app.listen(port, () => {
+            console.log(`Server has started on port http://localhost:${port}`);
+        })
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+startServer();

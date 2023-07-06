@@ -1,11 +1,12 @@
 import express from 'express';
 import Order from '../models/Order.js';
+import authenticate from '../middleWare/authMiddleWare.js';
 
 const router = express.Router();
 
 // Route: POST /orders
 // Create a new order
-router.post('/', async (req, res) => {
+router.post('/', authenticate, async (req, res) => {
   try {
     const newOrder = new Order(req.body);
     const savedOrder = await newOrder.save();
@@ -28,7 +29,7 @@ router.get('/', async (req, res) => {
 
 // Route: GET /orders/:id
 // Get a specific order by ID
-router.get('/:id', async (req, res) => {
+router.get('/:id', authenticate, async (req, res) => {
   try {
     const order = await Order.findById(req.params.id);
     if (!order) {
@@ -42,7 +43,7 @@ router.get('/:id', async (req, res) => {
 
 // Route: PUT /orders/:id
 // Update an order by ID
-router.put('/:id', async (req, res) => {
+router.put('/:id', authenticate, async (req, res) => {
   try {
     const order = await Order.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
@@ -58,7 +59,7 @@ router.put('/:id', async (req, res) => {
 
 // Route: DELETE /orders/:id
 // Delete an order by ID
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', authenticate, async (req, res) => {
   try {
     const order = await Order.findByIdAndDelete(req.params.id);
     if (!order) {

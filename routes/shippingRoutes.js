@@ -1,5 +1,6 @@
 import express from 'express';
 import ShippingAddress from '../models/ShippingAddress.js';
+import authenticate from '../middleWare/authMiddleWare.js';
 
 const router = express.Router();
 
@@ -17,7 +18,7 @@ router.post('/', async (req, res) => {
 
 // Route: GET /shipping/:userId
 // Get all shipping addresses for a user
-router.get('/:userId', async (req, res) => {
+router.get('/:userId', authenticate, async (req, res) => {
   try {
     const addresses = await ShippingAddress.find({ userId: req.params.userId });
     res.json(addresses);
@@ -28,7 +29,7 @@ router.get('/:userId', async (req, res) => {
 
 // Route: PUT /shipping/:id
 // Update a shipping address by ID
-router.put('/:id', async (req, res) => {
+router.put('/:id', authenticate, async (req, res) => {
   try {
     const address = await ShippingAddress.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
@@ -44,7 +45,7 @@ router.put('/:id', async (req, res) => {
 
 // Route: DELETE /shipping/:id
 // Delete a shipping address by ID
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', authenticate, async (req, res) => {
   try {
     const address = await ShippingAddress.findByIdAndDelete(req.params.id);
     if (!address) {

@@ -1,11 +1,12 @@
 import express from 'express';
 import Payment from '../models/Payment.js';
+import authenticate from '../middleWare/authMiddleWare.js';
 
 const router = express.Router();
 
 // Route: POST /payments
 // Create a new payment
-router.post('/', async (req, res) => {
+router.post('/', authenticate, async (req, res) => {
   try {
     const newPayment = new Payment(req.body);
     const savedPayment = await newPayment.save();
@@ -17,7 +18,7 @@ router.post('/', async (req, res) => {
 
 // Route: GET /payments/:userId
 // Get all payments for a user
-router.get('/:userId', async (req, res) => {
+router.get('/:userId', authenticate, async (req, res) => {
   try {
     const payments = await Payment.find({ userId: req.params.userId });
     res.json(payments);
@@ -28,7 +29,7 @@ router.get('/:userId', async (req, res) => {
 
 // Route: GET /payments/:id
 // Get a specific payment by ID
-router.get('/:id', async (req, res) => {
+router.get('/:id', authenticate, async (req, res) => {
   try {
     const payment = await Payment.findById(req.params.id);
     if (!payment) {
@@ -42,7 +43,7 @@ router.get('/:id', async (req, res) => {
 
 // Route: PUT /payments/:id
 // Update a payment status by ID
-router.put('/:id', async (req, res) => {
+router.put('/:id', authenticate, async (req, res) => {
   try {
     const payment = await Payment.findByIdAndUpdate(req.params.id, req.body, {
       new: true,

@@ -1,11 +1,11 @@
 import express from 'express';
 import Wishlist from '../models/Wishlist.js';
-
+import authenticate from '../middleWare/authMiddleWare.js';
 const router = express.Router();
 
 // Route: POST /wishlist
 // Add a product to the wishlist
-router.post('/', async (req, res) => {
+router.post('/', authenticate, async (req, res) => {
   try {
     const { userId, productId } = req.body;
     const wishlist = await Wishlist.findOne({ userId });
@@ -28,7 +28,7 @@ router.post('/', async (req, res) => {
 
 // Route: GET /wishlist/:userId
 // Get the wishlist for a user
-router.get('/:userId', async (req, res) => {
+router.get('/:userId', authenticate, async (req, res) => {
   try {
     const wishlist = await Wishlist.findOne({ userId: req.params.userId });
     if (!wishlist) {
@@ -42,7 +42,7 @@ router.get('/:userId', async (req, res) => {
 
 // Route: DELETE /wishlist/:userId/:productId
 // Remove a product from the wishlist
-router.delete('/:userId/:productId', async (req, res) => {
+router.delete('/:userId/:productId', authenticate, async (req, res) => {
   try {
     const wishlist = await Wishlist.findOne({ userId: req.params.userId });
     if (!wishlist) {
@@ -63,7 +63,7 @@ router.delete('/:userId/:productId', async (req, res) => {
 
 // Route: DELETE /wishlist/:userId
 // Clear the entire wishlist
-router.delete('/:userId', async (req, res) => {
+router.delete('/:userId', authenticate, async (req, res) => {
   try {
     const wishlist = await Wishlist.findOneAndDelete({ userId: req.params.userId });
     if (!wishlist) {

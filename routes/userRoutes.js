@@ -1,18 +1,41 @@
 import express from 'express';
 import User from '../models/User.js';
+import jwt from 'jsonwebtoken';
+import authenticate from '../middleWare/authMiddleWare.js';
 
 const router = express.Router();
 
-// Route: POST /users
-// Create a new user
-router.post('/', async (req, res) => {
-  try {
-    const newUser = new User(req.body);
-    const savedUser = await newUser.save();
-    res.status(201).json(savedUser);
-  } catch (error) {
-    res.status(500).json({ error: 'Failed to create user' });
-  }
+
+
+// Route: POST /signup
+// User signup
+router.post('/signup', async (req, res) => {
+    const { name, email, password } = req.body;
+
+    try {
+        // Check if a user with the same email already exists
+        const existingUser = await User.findOne({ email });
+        if (existingUser) {
+            return res.status(409).json({ error: 'Email already exists' });
+        }
+
+        // Hash the password
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        // Create a new user
+        const newUser = new User({ name, email, password: hashedPassword });
+        const savedUser = await newUser.save();
+
+        // Generate JWT
+        const token = jwt.sign({ userId: savedUser._id }, process.env.JWT_SECRET, {
+            expiresIn: '1h',
+        });
+
+        // Send the token in the response
+        res.json({ token });
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to register user' });
+    }
 });
 
 // Route: GET /users
@@ -26,9 +49,35 @@ router.get('/', async (req, res) => {
   }
 });
 
+// Route: POST /login
+// User Login
+router.post('/login', async (req, res) => {
+    const { email, password } = req.body;
+  
+    try {
+      // Find the user by email
+      const user = await User.findOne({ email });
+  
+      // Check if user exists and compare passwords
+      if (!user || !(await user.comparePassword(password))) {
+        return res.status(401).json({ error: 'Invalid email or password' });
+      }
+  
+      // Generate JWT
+      const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
+        expiresIn: '1h',
+      });
+  
+      // Send the token in the response
+      res.json({ token });
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to authenticate' });
+    }
+  });
+
 // Route: GET /users/:id
 // Get a specific user by ID
-router.get('/:id', async (req, res) => {
+router.get('/:id', authenticate, async (req, res) => {
   try {
     const user = await User.findById(req.params.id);
     if (!user) {
@@ -42,7 +91,7 @@ router.get('/:id', async (req, res) => {
 
 // Route: PUT /users/:id
 // Update a user by ID
-router.put('/:id', async (req, res) => {
+router.put('/:id', authenticate, async (req, res) => {
   try {
     const user = await User.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
@@ -58,7 +107,7 @@ router.put('/:id', async (req, res) => {
 
 // Route: DELETE /users/:id
 // Delete a user by ID
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', authenticate, async (req, res) => {
   try {
     const user = await User.findByIdAndDelete(req.params.id);
     if (!user) {
